@@ -67,47 +67,57 @@ export const coursesAPI = {
   getFilieres: () => api.get("/courses/filieres/"),
   getAnnees: () => api.get("/courses/annees/"),
   getRooms: () => api.get("/courses/rooms/"),
-  getCourses: () => api.get("/courses/courses/"),
-  getSchedules: () => api.get("/courses/schedules/"),
+  getCourses: () => api.get("/courses/"),
+  getSchedules: () => api.get("/schedules/"),
   getEvents: () => api.get("/courses/events/"),
+  getMyCourses: () => api.get("/courses/my_courses/"),
+  getMySchedule: () => api.get("/schedules/my_schedule/"),
 }
 
 export const gradesAPI = {
-  getGrades: () => api.get("/grades/grades/"),
-  getClaims: () => api.get("/grades/claims/"),
-  createClaim: (data) => api.post("/grades/claims/", data),
+  getGrades: () => api.get("/grades/"),
+  getMyGrades: () => api.get("/grades/my_grades/"),
+  getClaims: () => api.get("/request/requests/"),
+  createClaim: (data) => api.post("/request/requests/", data),
 }
 
 export const requestsAPI = {
   getRequests: () => api.get("/request/requests/"),
   createRequest: (data) => api.post("/request/requests/", data),
+  updateRequest: (id, data) => api.patch(`/request/requests/${id}/`, data),
 }
 
 export const notificationsAPI = {
   getNotifications: () => api.get("/users/notifications/"),
-  markAsRead: (id) => api.patch(`/users/notifications/${id}/`, { is_read: true }),
+  markAsRead: (id) => api.post(`/users/notifications/${id}/mark_read/`),
+  markAllAsRead: () => api.post("/users/notifications/mark_all_read/"),
+  getUnreadCount: () => api.get("/users/notifications/unread_count/"),
 }
 
 export const adminAPI = {
   // Users
-  getUsers: () => api.get("/admin/users/"),
-  createUser: (data) => api.post("/admin/users/", data),
-  updateUser: (id, data) => api.put(`/admin/users/${id}/`, data),
-  deleteUser: (id) => api.delete(`/admin/users/${id}/`),
+  getUsers: () => api.get("/users/list/"),
+  createUser: (data) => api.post("/users/register/teacher/", data),
+  updateUser: (id, data) => api.put(`/users/${id}/`, data),
+  deleteUser: (id) => api.delete(`/users/${id}/`),
 
   // Courses
-  getCourses: () => api.get("/admin/courses/"),
-  createCourse: (data) => api.post("/admin/courses/", data),
-  updateCourse: (id, data) => api.put(`/admin/courses/${id}/`, data),
-  deleteCourse: (id) => api.delete(`/admin/courses/${id}/`),
+  getCourses: () => api.get("/courses/"),
+  createCourse: (data) => api.post("/courses/", data),
+  updateCourse: (id, data) => api.put(`/courses/${id}/`, data),
+  deleteCourse: (id) => api.delete(`/courses/${id}/`),
 
-  // Claims
-  getClaims: () => api.get("/admin/claims/"),
-  updateClaim: (id, data) => api.put(`/admin/claims/${id}/`, data),
+  // Claims/Requests
+  getClaims: () => api.get("/request/requests/"),
+  updateClaim: (id, data) => api.patch(`/request/requests/${id}/`, data),
 
   // Requests
-  getRequests: () => api.get("/admin/requests/"),
-  updateRequest: (id, data) => api.put(`/admin/requests/${id}/`, data),
+  getRequests: () => api.get("/request/requests/"),
+  updateRequest: (id, data) => api.patch(`/request/requests/${id}/`, data),
+
+  // Grades
+  getGrades: () => api.get("/grades/"),
+  createGrade: (data) => api.post("/grades/", data),
 }
 
 export default api
