@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { coursesAPI } from "@/services/api"
+import { adminAPI } from "@/services/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,7 +31,7 @@ export default function SchedulesPage() {
 
   const fetchSchedules = async () => {
     try {
-      const response = await coursesAPI.getSchedules()
+      const response = await adminAPI.getSchedules()
       const schedulesData = Array.isArray(response.data) ? response.data : response.data.results || []
       setSchedules(schedulesData)
     } catch (error) {
@@ -44,7 +44,7 @@ export default function SchedulesPage() {
 
   const fetchCourses = async () => {
     try {
-      const response = await coursesAPI.getCourses()
+      const response = await adminAPI.getCourses()
       const coursesData = Array.isArray(response.data) ? response.data : response.data.results || []
       setCourses(coursesData)
     } catch (error) {
@@ -55,7 +55,7 @@ export default function SchedulesPage() {
 
   const fetchRooms = async () => {
     try {
-      const response = await coursesAPI.getRooms()
+      const response = await adminAPI.getRooms()
       const roomsData = Array.isArray(response.data) ? response.data : response.data.results || []
       setRooms(roomsData)
     } catch (error) {
@@ -66,8 +66,9 @@ export default function SchedulesPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log("[v0] Submitting schedule data:", formData)
     try {
-      await coursesAPI.createSchedule({
+      await adminAPI.createSchedule({
         ...formData,
         course: Number.parseInt(formData.course),
         room: Number.parseInt(formData.room),
@@ -84,17 +85,20 @@ export default function SchedulesPage() {
       })
       fetchSchedules()
     } catch (error) {
-      console.error("Error creating schedule:", error)
+      console.error("[v0] Error creating schedule:", error)
+      console.error("[v0] Error response:", error.response?.data)
+      alert(`Erreur lors de la création: ${error.response?.data?.message || error.message}`)
     }
   }
 
   const handleDelete = async (id) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cet emploi du temps?")) {
       try {
-        await coursesAPI.deleteSchedule(id)
+        await adminAPI.deleteSchedule(id)
         fetchSchedules()
       } catch (error) {
         console.error("Error deleting schedule:", error)
+        alert(`Erreur lors de la suppression: ${error.response?.data?.message || error.message}`)
       }
     }
   }
@@ -180,7 +184,7 @@ export default function SchedulesPage() {
                     className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-sm text-gray-900"
                     required
                   >
-                    <option value="lecture">Cours magistral</option>
+                    <option value="lecture">Cours</option>
                     <option value="tutorial">TD</option>
                     <option value="practical">TP</option>
                   </select>

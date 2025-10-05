@@ -46,6 +46,7 @@ export default function RoomsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log("[v0] Submitting room data:", formData)
     try {
       if (editingRoom) {
         await adminAPI.updateRoom(editingRoom.id, formData)
@@ -57,7 +58,9 @@ export default function RoomsPage() {
       setFormData({ name: "", capacity: "", room_type: "classroom", is_available: true })
       fetchRooms()
     } catch (error) {
-      console.error("Error saving room:", error)
+      console.error("[v0] Error saving room:", error)
+      console.error("[v0] Error response:", error.response?.data)
+      alert(`Erreur lors de la sauvegarde: ${error.response?.data?.message || error.message}`)
     }
   }
 

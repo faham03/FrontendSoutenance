@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { coursesAPI } from "@/services/api"
+import { adminAPI } from "@/services/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -29,7 +29,7 @@ export default function EventsManagementPage() {
 
   const fetchEvents = async () => {
     try {
-      const response = await coursesAPI.getEvents()
+      const response = await adminAPI.getEvents()
       const eventsData = Array.isArray(response.data) ? response.data : response.data.results || []
       setEvents(eventsData)
     } catch (error) {
@@ -42,7 +42,7 @@ export default function EventsManagementPage() {
 
   const fetchRooms = async () => {
     try {
-      const response = await coursesAPI.getRooms()
+      const response = await adminAPI.getRooms()
       const roomsData = Array.isArray(response.data) ? response.data : response.data.results || []
       setRooms(roomsData)
     } catch (error) {
@@ -53,8 +53,9 @@ export default function EventsManagementPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log("[v0] Submitting event data:", formData)
     try {
-      await coursesAPI.createEvent({
+      await adminAPI.createEvent({
         ...formData,
         room: Number.parseInt(formData.room),
       })
@@ -70,17 +71,20 @@ export default function EventsManagementPage() {
       })
       fetchEvents()
     } catch (error) {
-      console.error("Error creating event:", error)
+      console.error("[v0] Error creating event:", error)
+      console.error("[v0] Error response:", error.response?.data)
+      alert(`Erreur lors de la création: ${error.response?.data?.message || error.message}`)
     }
   }
 
   const handleDelete = async (id) => {
     if (window.confirm("Êtes-vous sûr de vouloir supprimer cet événement?")) {
       try {
-        await coursesAPI.deleteEvent(id)
+        await adminAPI.deleteEvent(id)
         fetchEvents()
       } catch (error) {
         console.error("Error deleting event:", error)
+        alert(`Erreur lors de la suppression: ${error.response?.data?.message || error.message}`)
       }
     }
   }
