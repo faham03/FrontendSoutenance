@@ -22,6 +22,11 @@ import ClaimsPage from "@/pages/admin/ClaimsPage"
 import AdminRequestsPage from "@/pages/admin/RequestsPage"
 import FilieresPage from "@/pages/admin/FilieresPage"
 import AnneesPage from "@/pages/admin/AnneesPage"
+import RoomsPage from "@/pages/admin/RoomsPage"
+import EventsManagementPage from "@/pages/admin/EventsManagementPage"
+import SchedulesPage from "@/pages/admin/SchedulesPage"
+import ProfilePage from "@/pages/ProfilePage"
+import GradeClaimsPage from "@/pages/student/GradeClaimsPage"
 
 function RoleBasedRedirect() {
   const { user, loading } = useAuth()
@@ -82,6 +87,8 @@ function App() {
                     <Route path="schedule" element={<SchedulePage />} />
                     <Route path="events" element={<EventsPage />} />
                     <Route path="requests" element={<RequestsPage />} />
+                    <Route path="claims" element={<GradeClaimsPage />} />
+                    <Route path="profile" element={<ProfilePage />} />
                   </Routes>
                 </DashboardLayout>
               </ProtectedRoute>
@@ -99,6 +106,7 @@ function App() {
                     <Route path="grades" element={<AssignGradesPage />} />
                     <Route path="schedule" element={<TeacherSchedulePage />} />
                     <Route path="permissions" element={<PermissionsPage />} />
+                    <Route path="profile" element={<ProfilePage />} />
                   </Routes>
                 </DashboardLayout>
               </ProtectedRoute>
@@ -117,8 +125,12 @@ function App() {
                     <Route path="filieres" element={<FilieresPage />} />
                     <Route path="annees" element={<AnneesPage />} />
                     <Route path="courses" element={<CoursesPage />} />
+                    <Route path="rooms" element={<RoomsPage />} />
+                    <Route path="events" element={<EventsManagementPage />} />
+                    <Route path="schedules" element={<SchedulesPage />} />
                     <Route path="claims" element={<ClaimsPage />} />
                     <Route path="requests" element={<AdminRequestsPage />} />
+                    <Route path="profile" element={<ProfilePage />} />
                   </Routes>
                 </DashboardLayout>
               </ProtectedRoute>

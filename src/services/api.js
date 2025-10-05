@@ -76,15 +76,21 @@ export const coursesAPI = {
 
 export const gradesAPI = {
   getGrades: () => api.get("/grades/grades/"),
-  getMyGrades: () => api.get("/grades/my_grades/"),
+  getMyGrades: () => api.get("/grades/grades/my_grades/"),
+  getAverages: () => api.get("/grades/grades/averages/"),
   getClaims: () => api.get("/grades/claims/"),
   createClaim: (data) => api.post("/grades/claims/", data),
+  respondToClaim: (id, data) => api.post(`/grades/claims/${id}/respond/`, data),
 }
 
 export const requestsAPI = {
   getRequests: () => api.get("/request/requests/"),
+  getMyRequests: () => api.get("/request/requests/my_requests/"),
   createRequest: (data) => api.post("/request/requests/", data),
   updateRequest: (id, data) => api.patch(`/request/requests/${id}/`, data),
+  approveRequest: (id, data) => api.post(`/request/requests/${id}/approve/`, data),
+  rejectRequest: (id, data) => api.post(`/request/requests/${id}/reject/`, data),
+  getPendingRequests: () => api.get("/request/requests/pending/"),
 }
 
 export const notificationsAPI = {
@@ -119,17 +125,47 @@ export const adminAPI = {
   updateCourse: (id, data) => api.put(`/courses/courses/${id}/`, data),
   deleteCourse: (id) => api.delete(`/courses/courses/${id}/`),
 
+  // Rooms management
+  getRooms: () => api.get("/courses/rooms/"),
+  createRoom: (data) => api.post("/courses/rooms/", data),
+  updateRoom: (id, data) => api.put(`/courses/rooms/${id}/`, data),
+  deleteRoom: (id) => api.delete(`/courses/rooms/${id}/`),
+
+  // Events management
+  getEvents: () => api.get("/courses/events/"),
+  createEvent: (data) => api.post("/courses/events/", data),
+  updateEvent: (id, data) => api.put(`/courses/events/${id}/`, data),
+  deleteEvent: (id) => api.delete(`/courses/events/${id}/`),
+
+  // Schedules management
+  getSchedules: () => api.get("/courses/schedules/"),
+  createSchedule: (data) => api.post("/courses/schedules/", data),
+  updateSchedule: (id, data) => api.put(`/courses/schedules/${id}/`, data),
+  deleteSchedule: (id) => api.delete(`/courses/schedules/${id}/`),
+
   // Claims/Requests
   getClaims: () => api.get("/grades/claims/"),
-  updateClaim: (id, data) => api.patch(`/grades/claims/${id}/`, data),
+  respondToClaim: (id, data) => api.post(`/grades/claims/${id}/respond/`, data),
 
   // Requests
   getRequests: () => api.get("/request/requests/"),
-  updateRequest: (id, data) => api.patch(`/request/requests/${id}/`, data),
+  getPendingRequests: () => api.get("/request/requests/pending/"),
+  approveRequest: (id, data) => api.post(`/request/requests/${id}/approve/`, data),
+  rejectRequest: (id, data) => api.post(`/request/requests/${id}/reject/`, data),
 
   // Grades
   getGrades: () => api.get("/grades/grades/"),
   createGrade: (data) => api.post("/grades/grades/", data),
+  getCourseGrades: (courseId) => api.get(`/grades/grades/course_grades/?course_id=${courseId}`),
+}
+
+// Teacher API
+export const teacherAPI = {
+  getMyCourses: () => api.get("/courses/courses/my_courses/"),
+  getMySchedule: () => api.get("/courses/schedules/my_schedule/"),
+  getCourseGrades: (courseId) => api.get(`/grades/grades/course_grades/?course_id=${courseId}`),
+  createGrade: (data) => api.post("/grades/grades/", data),
+  updateGrade: (id, data) => api.put(`/grades/grades/${id}/`, data),
 }
 
 export default api
