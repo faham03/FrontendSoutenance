@@ -1,26 +1,58 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { useAuth } from "@/context/AuthContext"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { GraduationCap } from "lucide-react"
+import { adminAPI } from "@/services/api"
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
+    username: "",
     email: "",
     password: "",
-    password_confirm: "",
+    password2: "",
     first_name: "",
     last_name: "",
-    matricule: "",
+    filiere: "",
+    annee: "",
   })
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [filieres, setFilieres] = useState([])
+  const [annees, setAnnees] = useState([])
   const { register } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    fetchFilieres()
+    fetchAnnees()
+  }, [])
+
+  const fetchFilieres = async () => {
+    try {
+      const response = await adminAPI.getFilieres()
+      const filieresData = Array.isArray(response.data) ? response.data : response.data?.results || []
+      setFilieres(filieresData)
+    } catch (error) {
+      console.error("Error fetching filieres:", error)
+      setFilieres([])
+    }
+  }
+
+  const fetchAnnees = async () => {
+    try {
+      const response = await adminAPI.getAnnees()
+      const anneesData = Array.isArray(response.data) ? response.data : response.data?.results || []
+      setAnnees(anneesData)
+    } catch (error) {
+      console.error("Error fetching annees:", error)
+      setAnnees([])
+    }
+  }
 
   const handleChange = (e) => {
     setFormData({
@@ -33,14 +65,30 @@ export default function RegisterPage() {
     e.preventDefault()
     setError("")
 
-    if (formData.password !== formData.password_confirm) {
+    if (formData.password !== formData.password2) {
       setError("Les mots de passe ne correspondent pas")
+      return
+    }
+
+    if (!formData.filiere || !formData.annee) {
+      setError("Veuillez sélectionner une filière et une année")
       return
     }
 
     setLoading(true)
 
-    const { password_confirm, ...dataToSend } = formData
+    const dataToSend = {
+      username: formData.username,
+      email: formData.email,
+      password: formData.password,
+      password2: formData.password2,
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      filiere: Number.parseInt(formData.filiere),
+      annee: Number.parseInt(formData.annee),
+    }
+
+    console.log("[v0] Sending registration data:", dataToSend)
     const result = await register(dataToSend)
 
     if (result.success) {
@@ -48,7 +96,8 @@ export default function RegisterPage() {
         state: { message: "Inscription réussie ! Vous pouvez maintenant vous connecter." },
       })
     } else {
-      setError(typeof result.error === "string" ? result.error : "Erreur lors de l'inscription")
+      console.error("[v0] Registration error:", result.error)
+      setError(typeof result.error === "string" ? result.error : JSON.stringify(result.error))
     }
 
     setLoading(false)
@@ -101,14 +150,14 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="matricule" className="text-sm font-medium">
-                Matricule
+              <label htmlFor="username" className="text-sm font-medium">
+                Nom d'utilisateur
               </label>
               <Input
-                id="matricule"
-                name="matricule"
-                placeholder="ETU2024001"
-                value={formData.matricule}
+                id="username"
+                name="username"
+                placeholder="jean.dupont"
+                value={formData.username}
                 onChange={handleChange}
                 required
               />
@@ -129,6 +178,50 @@ export default function RegisterPage() {
               />
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="filiere" className="text-sm font-medium">
+                  Filière
+                </label>
+                <select
+                  id="filiere"
+                  name="filiere"
+                  className="w-full rounded-md border border-input bg-white text-gray-900 px-3 py-2 text-sm"
+                  value={formData.filiere}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Sélectionnez une filière</option>
+                  {filieres.map((filiere) => (
+                    <option key={filiere.id} value={filiere.id}>
+                      {filiere.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="annee" className="text-sm font-medium">
+                  Année
+                </label>
+                <select
+                  id="annee"
+                  name="annee"
+                  className="w-full rounded-md border border-input bg-white text-gray-900 px-3 py-2 text-sm"
+                  value={formData.annee}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Sélectionnez une année</option>
+                  {annees.map((annee) => (
+                    <option key={annee.id} value={annee.id}>
+                      {annee.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <label htmlFor="password" className="text-sm font-medium">
                 Mot de passe
@@ -145,15 +238,15 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password_confirm" className="text-sm font-medium">
+              <label htmlFor="password2" className="text-sm font-medium">
                 Confirmer le mot de passe
               </label>
               <Input
-                id="password_confirm"
-                name="password_confirm"
+                id="password2"
+                name="password2"
                 type="password"
                 placeholder="••••••••"
-                value={formData.password_confirm}
+                value={formData.password2}
                 onChange={handleChange}
                 required
               />

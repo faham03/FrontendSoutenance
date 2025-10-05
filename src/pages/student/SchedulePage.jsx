@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { coursesAPI } from "@/services/api"
-import { Calendar, Clock, MapPin } from "lucide-react"
+import { Calendar, Clock, MapPin, AlertCircle } from "lucide-react"
 
 export default function SchedulePage() {
   const [schedules, setSchedules] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     fetchSchedules()
@@ -15,10 +16,17 @@ export default function SchedulePage() {
 
   const fetchSchedules = async () => {
     try {
-      const response = await coursesAPI.getSchedules()
-      setSchedules(response.data)
+      const response = await coursesAPI.getMySchedule()
+      console.log("[v0] Schedule API response:", response.data)
+
+      const schedulesData = Array.isArray(response.data) ? response.data : response.data?.results || []
+
+      setSchedules(schedulesData)
+      setError(null)
     } catch (error) {
       console.error("Error fetching schedules:", error)
+      setError("Erreur lors du chargement de l'emploi du temps.")
+      setSchedules([])
     } finally {
       setLoading(false)
     }
@@ -43,6 +51,28 @@ export default function SchedulePage() {
     return (
       <div className="flex h-full items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold">Emploi du temps</h1>
+          <p className="text-muted-foreground">Consultez votre emploi du temps hebdomadaire</p>
+        </div>
+        <Card>
+          <CardContent className="py-8">
+            <div className="flex flex-col items-center gap-4 text-center">
+              <AlertCircle className="h-12 w-12 text-yellow-500" />
+              <div>
+                <h3 className="text-lg font-semibold">Fonctionnalité en développement</h3>
+                <p className="text-muted-foreground mt-2">{error}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }

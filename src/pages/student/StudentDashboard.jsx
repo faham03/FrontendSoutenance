@@ -26,7 +26,16 @@ export default function StudentDashboard() {
         requestsAPI.getRequests(),
       ])
 
-      const grades = gradesRes.data
+      console.log("[v0] Grades response:", gradesRes.data)
+      console.log("[v0] Events response:", eventsRes.data)
+      console.log("[v0] Requests response:", requestsRes.data)
+
+      const grades = Array.isArray(gradesRes.data) ? gradesRes.data : gradesRes.data?.results || []
+
+      const events = Array.isArray(eventsRes.data) ? eventsRes.data : eventsRes.data?.results || []
+
+      const requests = Array.isArray(requestsRes.data) ? requestsRes.data : requestsRes.data?.results || []
+
       const validatedGrades = grades.filter((g) => g.status === "validated")
       const average =
         validatedGrades.length > 0
@@ -36,8 +45,8 @@ export default function StudentDashboard() {
       setStats({
         totalGrades: grades.length,
         averageGrade: average.toFixed(2),
-        upcomingEvents: eventsRes.data.length,
-        pendingRequests: requestsRes.data.filter((r) => r.status === "pending").length,
+        upcomingEvents: events.length,
+        pendingRequests: requests.filter((r) => r.status === "pending").length,
       })
     } catch (error) {
       console.error("Error fetching dashboard data:", error)

@@ -20,9 +20,12 @@ export default function GradesPage() {
   const fetchGrades = async () => {
     try {
       const response = await gradesAPI.getGrades()
-      setGrades(response.data)
+      console.log("[v0] Grades response:", response.data)
+      const gradesData = Array.isArray(response.data) ? response.data : response.data?.results || []
+      setGrades(gradesData)
     } catch (error) {
       console.error("Error fetching grades:", error)
+      setGrades([])
     } finally {
       setLoading(false)
     }

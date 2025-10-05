@@ -40,6 +40,8 @@ export default function DashboardLayout({ children }) {
         { icon: LayoutDashboard, label: "Tableau de bord", path: "/admin/dashboard" },
         { icon: User, label: "Utilisateurs", path: "/admin/users" },
         { icon: BookOpen, label: "Cours", path: "/admin/courses" },
+        { icon: BookOpen, label: "Filières", path: "/admin/filieres" },
+        { icon: Calendar, label: "Années", path: "/admin/annees" },
         { icon: FileText, label: "Réclamations", path: "/admin/claims" },
         { icon: FileText, label: "Demandes", path: "/admin/requests" },
       ]

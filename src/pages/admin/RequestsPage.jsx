@@ -19,9 +19,14 @@ export default function RequestsPage() {
   const fetchRequests = async () => {
     try {
       const res = await adminAPI.getRequests()
-      setRequests(res.data)
+      console.log("[v0] Requests API response:", res.data)
+
+      const requestsData = Array.isArray(res.data) ? res.data : res.data?.results || []
+
+      setRequests(requestsData)
     } catch (error) {
       console.error("Error fetching requests:", error)
+      setRequests([])
     } finally {
       setLoading(false)
     }

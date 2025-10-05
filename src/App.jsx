@@ -20,6 +20,8 @@ import UsersPage from "@/pages/admin/UsersPage"
 import CoursesPage from "@/pages/admin/CoursesPage"
 import ClaimsPage from "@/pages/admin/ClaimsPage"
 import AdminRequestsPage from "@/pages/admin/RequestsPage"
+import FilieresPage from "@/pages/admin/FilieresPage"
+import AnneesPage from "@/pages/admin/AnneesPage"
 
 function RoleBasedRedirect() {
   const { user, loading } = useAuth()
@@ -112,6 +114,8 @@ function App() {
                   <Routes>
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="users" element={<UsersPage />} />
+                    <Route path="filieres" element={<FilieresPage />} />
+                    <Route path="annees" element={<AnneesPage />} />
                     <Route path="courses" element={<CoursesPage />} />
                     <Route path="claims" element={<ClaimsPage />} />
                     <Route path="requests" element={<AdminRequestsPage />} />
