@@ -2,16 +2,14 @@
 
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { gradesAPI } from "@/services/api"
-import { AlertCircle, CheckCircle, Clock } from "lucide-react"
+import { CheckCircle, Clock, XCircle, TrendingUp } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 
 export default function GradesPage() {
   const [grades, setGrades] = useState([])
+  const [averages, setAverages] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [showClaimModal, setShowClaimModal] = useState(false)
-  const [selectedGrade, setSelectedGrade] = useState(null)
-  const [claimReason, setClaimReason] = useState("")
 
   useEffect(() => {
     fetchGrades()
@@ -19,10 +17,11 @@ export default function GradesPage() {
 
   const fetchGrades = async () => {
     try {
-      const response = await gradesAPI.getGrades()
-      console.log("[v0] Grades response:", response.data)
-      const gradesData = Array.isArray(response.data) ? response.data : response.data?.results || []
+      const [gradesRes, averagesRes] = await Promise.all([gradesAPI.getMyGrades(), gradesAPI.getAverages()])
+
+      const gradesData = Array.isArray(gradesRes.data) ? gradesRes.data : gradesRes.data?.results || []
       setGrades(gradesData)
+      setAverages(averagesRes.data)
     } catch (error) {
       console.error("Error fetching grades:", error)
       setGrades([])
@@ -31,39 +30,30 @@ export default function GradesPage() {
     }
   }
 
-  const handleClaim = async () => {
-    if (!selectedGrade || !claimReason.trim()) return
-
-    try {
-      await gradesAPI.createClaim({
-        grade: selectedGrade.id,
-        reason: claimReason,
-      })
-      setShowClaimModal(false)
-      setClaimReason("")
-      setSelectedGrade(null)
-      alert("Réclamation envoyée avec succès")
-      fetchGrades()
-    } catch (error) {
-      console.error("Error creating claim:", error)
-      alert("Erreur lors de l'envoi de la réclamation")
-    }
-  }
-
   const getStatusBadge = (status) => {
     const badges = {
-      pending: { icon: Clock, text: "En attente", className: "bg-yellow-500/10 text-yellow-500" },
-      validated: { icon: CheckCircle, text: "Validée", className: "bg-green-500/10 text-green-500" },
-      rejected: { icon: AlertCircle, text: "Rejetée", className: "bg-red-500/10 text-red-500" },
+      pending: { icon: Clock, text: "En attente", variant: "secondary" },
+      validated: { icon: CheckCircle, text: "Validée", variant: "default" },
+      rejected: { icon: XCircle, text: "Rejetée", variant: "destructive" },
     }
     const badge = badges[status] || badges.pending
     const Icon = badge.icon
     return (
-      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-medium ${badge.className}`}>
+      <Badge variant={badge.variant} className="gap-1">
         <Icon className="h-3 w-3" />
         {badge.text}
-      </span>
+      </Badge>
     )
+  }
+
+  const getEvaluationType = (type) => {
+    const types = {
+      exam: "Examen",
+      test: "Contrôle continu",
+      project: "Projet",
+      participation: "Participation",
+    }
+    return types[type] || type
   }
 
   if (loading) {
@@ -78,8 +68,33 @@ export default function GradesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Mes Notes</h1>
-        <p className="text-muted-foreground">Consultez vos notes et faites des réclamations si nécessaire</p>
+        <p className="text-muted-foreground">Consultez vos notes et vos moyennes</p>
       </div>
+
+      {averages && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Moyennes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <p className="text-sm text-muted-foreground">Moyenne générale</p>
+                <p className="text-3xl font-bold">{averages.average ? averages.average.toFixed(2) : "N/A"}/20</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Moyenne pondérée</p>
+                <p className="text-3xl font-bold">
+                  {averages.weighted_avg ? averages.weighted_avg.toFixed(2) : "N/A"}/20
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>
@@ -87,41 +102,37 @@ export default function GradesPage() {
         </CardHeader>
         <CardContent>
           {grades.length === 0 ? (
-            <p className="text-center text-muted-foreground">Aucune note disponible</p>
+            <p className="text-center text-muted-foreground py-8">Aucune note disponible</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
                     <th className="pb-3 text-left text-sm font-medium text-muted-foreground">Cours</th>
+                    <th className="pb-3 text-left text-sm font-medium text-muted-foreground">Type</th>
                     <th className="pb-3 text-left text-sm font-medium text-muted-foreground">Note</th>
+                    <th className="pb-3 text-left text-sm font-medium text-muted-foreground">Coef.</th>
+                    <th className="pb-3 text-left text-sm font-medium text-muted-foreground">Semestre</th>
                     <th className="pb-3 text-left text-sm font-medium text-muted-foreground">Statut</th>
                     <th className="pb-3 text-left text-sm font-medium text-muted-foreground">Date</th>
-                    <th className="pb-3 text-left text-sm font-medium text-muted-foreground">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {grades.map((grade) => (
                     <tr key={grade.id} className="border-b border-border">
-                      <td className="py-4 text-sm">{grade.course_name || "Cours"}</td>
-                      <td className="py-4 text-sm font-bold">{grade.grade}/20</td>
+                      <td className="py-4">
+                        <div>
+                          <p className="text-sm font-medium">{grade.course_code}</p>
+                          <p className="text-xs text-muted-foreground">{grade.course_title}</p>
+                        </div>
+                      </td>
+                      <td className="py-4 text-sm">{getEvaluationType(grade.evaluation_type)}</td>
+                      <td className="py-4 text-lg font-bold">{grade.value}/20</td>
+                      <td className="py-4 text-sm">×{grade.weight}</td>
+                      <td className="py-4 text-sm">{grade.semester}</td>
                       <td className="py-4">{getStatusBadge(grade.status)}</td>
                       <td className="py-4 text-sm text-muted-foreground">
-                        {new Date(grade.created_at).toLocaleDateString("fr-FR")}
-                      </td>
-                      <td className="py-4">
-                        {grade.status === "validated" && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setSelectedGrade(grade)
-                              setShowClaimModal(true)
-                            }}
-                          >
-                            Réclamer
-                          </Button>
-                        )}
+                        {new Date(grade.evaluation_date).toLocaleDateString("fr-FR")}
                       </td>
                     </tr>
                   ))}
@@ -131,49 +142,6 @@ export default function GradesPage() {
           )}
         </CardContent>
       </Card>
-
-      {/* Claim Modal */}
-      {showClaimModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle>Faire une réclamation</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Note: <span className="font-bold">{selectedGrade?.grade}/20</span>
-                </p>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Raison de la réclamation</label>
-                <textarea
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                  rows={4}
-                  placeholder="Expliquez pourquoi vous réclamez cette note..."
-                  value={claimReason}
-                  onChange={(e) => setClaimReason(e.target.value)}
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={handleClaim} disabled={!claimReason.trim()}>
-                  Envoyer
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setShowClaimModal(false)
-                    setClaimReason("")
-                    setSelectedGrade(null)
-                  }}
-                >
-                  Annuler
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   )
 }

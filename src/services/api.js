@@ -78,6 +78,10 @@ export const gradesAPI = {
   getGrades: () => api.get("/grades/grades/"),
   getMyGrades: () => api.get("/grades/grades/my_grades/"),
   getAverages: () => api.get("/grades/grades/averages/"),
+  getCourseGrades: (courseId) => api.get(`/grades/grades/course_grades/?course_id=${courseId}`),
+  createGrade: (data) => api.post("/grades/grades/", data),
+  updateGrade: (id, data) => api.put(`/grades/grades/${id}/`, data),
+  deleteGrade: (id) => api.delete(`/grades/grades/${id}/`),
   getClaims: () => api.get("/grades/claims/"),
   createClaim: (data) => api.post("/grades/claims/", data),
   respondToClaim: (id, data) => api.post(`/grades/claims/${id}/respond/`, data),
@@ -164,8 +168,10 @@ export const teacherAPI = {
   getMyCourses: () => api.get("/courses/courses/my_courses/"),
   getMySchedule: () => api.get("/courses/schedules/my_schedule/"),
   getCourseGrades: (courseId) => api.get(`/grades/grades/course_grades/?course_id=${courseId}`),
+  getMyGrades: () => api.get("/grades/grades/"),
   createGrade: (data) => api.post("/grades/grades/", data),
   updateGrade: (id, data) => api.put(`/grades/grades/${id}/`, data),
+  deleteGrade: (id) => api.delete(`/grades/grades/${id}/`),
 }
 
 export default api

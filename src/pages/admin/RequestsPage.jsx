@@ -73,7 +73,7 @@ export default function RequestsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Gestion des Demandes</h1>
-        <p className="text-muted-foreground">Traitez les demandes des étudiants</p>
+        <p className="text-muted-foreground">Traitez les demandes des étudiants et enseignants</p>
       </div>
 
       <Card>
@@ -90,16 +90,38 @@ export default function RequestsPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h4 className="font-semibold">{request.request_type}</h4>
+                        <h4 className="font-semibold">{request.title || request.type_request}</h4>
                         {getStatusBadge(request.status)}
                       </div>
                       <p className="mt-2 text-sm">
-                        <span className="font-medium">Étudiant:</span> {request.student_name || "N/A"}
+                        <span className="font-medium">Demandeur:</span> {request.requester_name || "N/A"}
+                        {request.requester_matricule && ` (${request.requester_matricule})`}
                       </p>
+                      <p className="mt-1 text-sm">
+                        <span className="font-medium">Type:</span>{" "}
+                        {request.type_request === "academic_record"
+                          ? "Relevé de notes"
+                          : request.type_request === "certificate"
+                            ? "Attestation de scolarité"
+                            : request.type_request === "grade_appeal"
+                              ? "Réclamation de note"
+                              : request.type_request === "administrative"
+                                ? "Demande administrative"
+                                : "Autre"}
+                      </p>
+                      {request.type_request === "grade_appeal" && request.grade_course && (
+                        <p className="mt-1 text-sm">
+                          <span className="font-medium">Cours:</span> {request.grade_course}
+                          {request.grade_value && ` - Note: ${request.grade_value}/20`}
+                        </p>
+                      )}
                       <p className="mt-2 text-sm text-muted-foreground">{request.description}</p>
                       <p className="mt-2 text-xs text-muted-foreground">
                         {new Date(request.created_at).toLocaleDateString("fr-FR")}
                       </p>
+                      {request.processed_by_name && (
+                        <p className="mt-1 text-xs text-muted-foreground">Traité par: {request.processed_by_name}</p>
+                      )}
                     </div>
                   </div>
                   {request.status === "pending" && (

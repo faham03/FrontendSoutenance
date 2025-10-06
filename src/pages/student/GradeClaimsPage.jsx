@@ -36,8 +36,11 @@ export default function GradeClaimsPage() {
   const fetchData = async () => {
     try {
       const [claimsRes, gradesRes] = await Promise.all([gradesAPI.getClaims(), gradesAPI.getMyGrades()])
-      setClaims(claimsRes.data)
-      setGrades(gradesRes.data)
+      const claimsData = Array.isArray(claimsRes.data) ? claimsRes.data : claimsRes.data?.results || []
+      const gradesData = Array.isArray(gradesRes.data) ? gradesRes.data : gradesRes.data?.results || []
+
+      setClaims(claimsData)
+      setGrades(gradesData.filter((g) => g.status === "validated"))
     } catch (error) {
       console.error("Error fetching data:", error)
     } finally {
@@ -56,7 +59,8 @@ export default function GradeClaimsPage() {
       setFormData({ grade: "", reason: "" })
       fetchData()
     } catch (error) {
-      setMessage({ type: "error", text: "Erreur lors de la création de la réclamation" })
+      const errorMsg = error.response?.data?.grade?.[0] || error.response?.data?.detail || "Erreur lors de la création"
+      setMessage({ type: "error", text: errorMsg })
     }
   }
 
@@ -74,6 +78,16 @@ export default function GradeClaimsPage() {
         {config.label}
       </Badge>
     )
+  }
+
+  const getEvaluationType = (type) => {
+    const types = {
+      exam: "Examen",
+      test: "Contrôle continu",
+      project: "Projet",
+      participation: "Participation",
+    }
+    return types[type] || type
   }
 
   if (loading) {
@@ -112,7 +126,7 @@ export default function GradeClaimsPage() {
                   <option value="">Sélectionner une note</option>
                   {grades.map((grade) => (
                     <option key={grade.id} value={grade.id}>
-                      {grade.course_title} - {grade.value}/20 ({grade.evaluation_type})
+                      {grade.course_code} - {grade.value}/20 ({getEvaluationType(grade.evaluation_type)})
                     </option>
                   ))}
                 </select>
@@ -156,10 +170,10 @@ export default function GradeClaimsPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div>
-                    <CardTitle className="text-lg">{claim.grade_details?.course_title}</CardTitle>
-                    <CardDescription>
-                      Note: {claim.grade_details?.value}/20 - {claim.grade_details?.evaluation_type}
-                    </CardDescription>
+                    <CardTitle className="text-lg">
+                      {claim.course_code} - {claim.course_title}
+                    </CardTitle>
+                    <CardDescription>Note: {claim.grade_value}/20</CardDescription>
                   </div>
                   {getStatusBadge(claim.status)}
                 </div>
@@ -170,9 +184,14 @@ export default function GradeClaimsPage() {
                   <p className="mt-1 text-sm text-muted-foreground">{claim.reason}</p>
                 </div>
                 {claim.admin_response && (
-                  <div>
+                  <div className="rounded-md bg-muted p-3">
                     <Label className="text-sm font-medium">Réponse de l'administration:</Label>
                     <p className="mt-1 text-sm text-muted-foreground">{claim.admin_response}</p>
+                    {claim.responded_at && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Répondu le {new Date(claim.responded_at).toLocaleDateString("fr-FR")}
+                      </p>
+                    )}
                   </div>
                 )}
                 <div className="text-xs text-muted-foreground">

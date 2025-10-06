@@ -50,16 +50,15 @@ export default function LoginPage() {
           <div className="space-y-4">
             <h2 className="text-3xl font-semibold">Bienvenue sur la plateforme</h2>
             <p className="text-lg text-blue-100">
-              Connectez-vous pour accéder à votre espace personnel et découvrir toutes les fonctionnalités de notre plateforme Ayuda.
+              Connectez-vous pour accéder à votre espace personnel et découvrir toutes les fonctionnalités de notre
+              plateforme Ayuda.
             </p>
           </div>
         </div>
-        
+
         {/* Copyright en bas */}
         <div className="absolute bottom-8 text-center">
-          <p className="text-blue-200 text-sm">
-            © {new Date().getFullYear()} Ayuda. Tous droits réservés.
-          </p>
+          <p className="text-blue-200 text-sm">© {new Date().getFullYear()} Ayuda. Tous droits réservés.</p>
         </div>
       </div>
 
