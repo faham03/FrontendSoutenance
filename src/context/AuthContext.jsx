@@ -22,14 +22,17 @@ export const AuthProvider = ({ children }) => {
   }, [])
 
   const checkAuth = async () => {
-    const token = localStorage.getItem("access_token")
+    const token = sessionStorage.getItem("access_token")
     if (token) {
       try {
         const response = await authAPI.getCurrentUser()
         const userData = response.data
         console.log("[v0] User data from API:", userData)
 
-        if (userData.is_admin) {
+        if (userData.role) {
+          // If backend sends role directly, use it
+          console.log("[v0] User role from backend:", userData.role)
+        } else if (userData.is_admin) {
           userData.role = "admin"
         } else if (userData.is_teacher) {
           userData.role = "teacher"
@@ -45,8 +48,8 @@ export const AuthProvider = ({ children }) => {
         setUser(userData)
       } catch (error) {
         console.error("[v0] Auth check failed:", error)
-        localStorage.removeItem("access_token")
-        localStorage.removeItem("refresh_token")
+        sessionStorage.removeItem("access_token")
+        sessionStorage.removeItem("refresh_token")
       }
     }
     setLoading(false)
@@ -59,8 +62,8 @@ export const AuthProvider = ({ children }) => {
       const { access, refresh } = response.data
 
       console.log("[v0] Login successful, tokens received")
-      localStorage.setItem("access_token", access)
-      localStorage.setItem("refresh_token", refresh)
+      sessionStorage.setItem("access_token", access)
+      sessionStorage.setItem("refresh_token", refresh)
 
       console.log("[v0] Calling getCurrentUser API...")
       const userResponse = await authAPI.getCurrentUser()
@@ -73,7 +76,10 @@ export const AuthProvider = ({ children }) => {
       console.log("[v0] is_teacher:", userData.is_teacher)
       console.log("[v0] is_student:", userData.is_student)
 
-      if (userData.is_admin) {
+      if (userData.role) {
+        // If backend sends role directly, use it
+        console.log("[v0] User role from backend:", userData.role)
+      } else if (userData.is_admin) {
         userData.role = "admin"
       } else if (userData.is_teacher) {
         userData.role = "teacher"
@@ -99,8 +105,8 @@ export const AuthProvider = ({ children }) => {
   }
 
   const logout = () => {
-    localStorage.removeItem("access_token")
-    localStorage.removeItem("refresh_token")
+    sessionStorage.removeItem("access_token")
+    sessionStorage.removeItem("refresh_token")
     setUser(null)
   }
 

@@ -25,7 +25,7 @@ export default function RoomsPage() {
   const [formData, setFormData] = useState({
     name: "",
     capacity: "",
-    room_type: "classroom",
+    room_type: "salle",
     is_available: true,
   })
 
@@ -46,16 +46,20 @@ export default function RoomsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log("[v0] Submitting room data:", formData)
+    const dataToSend = {
+      ...formData,
+      capacity: Number.parseInt(formData.capacity, 10),
+    }
+    console.log("[v0] Submitting room data:", dataToSend)
     try {
       if (editingRoom) {
-        await adminAPI.updateRoom(editingRoom.id, formData)
+        await adminAPI.updateRoom(editingRoom.id, dataToSend)
       } else {
-        await adminAPI.createRoom(formData)
+        await adminAPI.createRoom(dataToSend)
       }
       setDialogOpen(false)
       setEditingRoom(null)
-      setFormData({ name: "", capacity: "", room_type: "classroom", is_available: true })
+      setFormData({ name: "", capacity: "", room_type: "salle", is_available: true })
       fetchRooms()
     } catch (error) {
       console.error("[v0] Error saving room:", error)
@@ -88,11 +92,10 @@ export default function RoomsPage() {
 
   const getRoomTypeLabel = (type) => {
     const types = {
-      classroom: "Salle de classe",
-      lab: "Laboratoire",
-      amphitheater: "Amphithéâtre",
-      library: "Bibliothèque",
-      other: "Autre",
+      amphi: "Amphithéâtre",
+      tp: "TP / Lab",
+      td: "TD",
+      salle: "Salle de cours",
     }
     return types[type] || type
   }
@@ -113,7 +116,7 @@ export default function RoomsPage() {
             <Button
               onClick={() => {
                 setEditingRoom(null)
-                setFormData({ name: "", capacity: "", room_type: "classroom", is_available: true })
+                setFormData({ name: "", capacity: "", room_type: "salle", is_available: true })
               }}
             >
               <Plus className="mr-2 h-4 w-4" />
@@ -155,11 +158,10 @@ export default function RoomsPage() {
                   value={formData.room_type}
                   onChange={(e) => setFormData({ ...formData, room_type: e.target.value })}
                 >
-                  <option value="classroom">Salle de classe</option>
-                  <option value="lab">Laboratoire</option>
-                  <option value="amphitheater">Amphithéâtre</option>
-                  <option value="library">Bibliothèque</option>
-                  <option value="other">Autre</option>
+                  <option value="salle">Salle de cours</option>
+                  <option value="amphi">Amphithéâtre</option>
+                  <option value="tp">TP / Lab</option>
+                  <option value="td">TD</option>
                 </select>
               </div>
               <div className="flex items-center space-x-2">
